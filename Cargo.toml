@@ -1,0 +1,19 @@
+[package]
+name = "paperless-ngx-upload"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "A tool to upload one or more documents to Paperless-ngx"
+repository = "https://github.com/jcjones/paperless-ngx-upload"
+readme = "README.md"
+
+[dependencies]
+clap = { version = "4.5.30", features = ["derive"] }
+confy = "0.6.1"
+env_logger = "0.9"
+indicatif = { version = "0.17.11", features = ["tokio"] }
+log = "*"
+paperless_ngx_api = { version = "0.1.0", path = "../lib-paperless-ngx-rs" }
+serde = { version = "1.0.152", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7.3", features = ["codec"] }
