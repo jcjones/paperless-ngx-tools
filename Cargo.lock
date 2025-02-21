@@ -983,6 +983,8 @@ dependencies = [
 [[package]]
 name = "paperless_ngx_api"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "afbe50183232486e39ddbadc74075e12dec428dc21981a9e51443d520c6435c6"
 dependencies = [
  "env_logger",
  "reqwest",
