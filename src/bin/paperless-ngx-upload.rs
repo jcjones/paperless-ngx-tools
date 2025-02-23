@@ -1,6 +1,8 @@
 use clap::Parser;
 use indicatif::{ProgressBar, ProgressStyle};
-use paperless_ngx_api::client::{PaperlessNgxClient, PaperlessNgxClientBuilder};
+use log::info;
+use paperless_ngx_api::client::PaperlessNgxClientBuilder;
+use paperless_ngx_api::task::Task;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -21,16 +23,13 @@ struct Config {
     auth: String,
 }
 
-async fn print_task_status(
-    client: &PaperlessNgxClient,
-    uuid: &String,
-) -> Result<(), Box<dyn std::error::Error>> {
+async fn print_task_status<'a>(task: Task<'a>) -> Result<(), Box<dyn std::error::Error>> {
     let bar = ProgressBar::new_spinner();
     bar.enable_steady_tick(Duration::from_millis(100));
     bar.set_style(ProgressStyle::with_template("[{elapsed_precise}] {spinner} {msg}").unwrap());
 
     loop {
-        let status = client.task_status(uuid).await?;
+        let status = task.status().await?;
         bar.set_message(format!(
             "Filename: {0} Status: {1}",
             status.task_file_name, status.status
@@ -55,7 +54,7 @@ async fn print_task_status(
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    println!(
+    info!(
         "Loading configuration from {:?}",
         confy::get_configuration_file_path("paperless-ngx-upload", None)?
     );
@@ -73,8 +72,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
 
     for filepath in args.files {
-        let task_uuid = client.upload(&filepath).await?;
-        print_task_status(&client, &task_uuid).await?;
+        let task = client.upload(&filepath).await?;
+        print_task_status(task).await?;
     }
 
     Ok(())
