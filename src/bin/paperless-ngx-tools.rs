@@ -14,6 +14,9 @@ struct Args {
 
     #[arg(long, help = "Auth token to use")]
     auth: Option<String>,
+
+    #[arg(short, long, help = "Do not make changes")]
+    noop: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -30,14 +33,21 @@ enum Commands {
         #[arg(short, long)]
         correspondent: Option<String>,
     },
+    /// list document IDs, optionally by filter mechanism
+    ListDocumentIds {
+        /// filter by correspondent name
+        #[arg(short, long)]
+        correspondent: Option<String>,
+    },
+    /// move documents from one correspondent to another
     MigrateCorrespondents {
         /// Correspondent ID to move documents from
         #[arg(short, long)]
-        from_correspondent_id: i32,
+        from: i32,
 
         /// Correspondent ID to move documents to
         #[arg(short, long)]
-        to_correspondent_id: i32,
+        to: i32,
     },
 
     /// Stores the --auth and --url to the config file
@@ -74,6 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = PaperlessNgxClientBuilder::default()
         .set_url(&cfg.url)
         .set_auth_token(&cfg.auth)
+        .set_no_op(args.noop)
         .build()?;
 
     match &args.command {
@@ -95,14 +106,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("{}: {} [{:?}]", doc.id, doc.title, doc.tags);
             }
         }
-        Some(Commands::MigrateCorrespondents {
-            from_correspondent_id,
-            to_correspondent_id,
-        }) => {
-            println!(
-                "Moving from {} to {}",
-                from_correspondent_id, to_correspondent_id,
-            );
+        Some(Commands::ListDocumentIds { correspondent }) => {
+            let mut correspondent_obj = None;
+            if let Some(name) = correspondent {
+                debug!("Looking up correspondent by name: {}", name);
+                correspondent_obj = Some(client.correspondent_for_name(name.clone()).await?);
+                debug!("Got correspondent: {:?}", correspondent_obj)
+            }
+            let doc_ids = client.document_ids(correspondent_obj).await?;
+            for id in doc_ids {
+                println!("{id}");
+            }
+        }
+        Some(Commands::MigrateCorrespondents { from, to }) => {
+            let from_correspondent = client.correspondent_get(from).await?;
+            let to_correspondent = client.correspondent_get(to).await?;
+            println!("Moving from {} to {}", from_correspondent, to_correspondent);
+            let doc_ids = client.document_ids(Some(from_correspondent)).await?;
+            client
+                .documents_bulk_set_correspondent(doc_ids, &to_correspondent)
+                .await?
         }
         Some(Commands::Store) => {
             confy::store(APP_NAME, None, &cfg)?;

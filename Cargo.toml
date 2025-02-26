@@ -8,6 +8,8 @@ description = "Paperless-ngx tools"
 repository = "https://github.com/jcjones/paperless-ngx-tools"
 readme = "README.md"
 
+default-run = "paperless-ngx-tools"
+
 [dependencies]
 clap = { version = "4.5.30", features = ["derive"] }
 confy = "0.6.1"
