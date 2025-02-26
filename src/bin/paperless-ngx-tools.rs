@@ -3,6 +3,19 @@ use log::{debug, info};
 use paperless_ngx_api::client::PaperlessNgxClientBuilder;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum PaperlessToolError {
+    #[error("Unable to delete item {id}: {reason}")]
+    UnableToDelete { id: i32, reason: String },
+
+    #[error("API interaction error: {0}")]
+    PaperlessAPI(#[from] paperless_ngx_api::errors::PaperlessError),
+
+    #[error("Error reading configuration: {0}")]
+    ConfyError(#[from] confy::ConfyError),
+}
+
 #[derive(Parser, Debug)]
 #[command(version, about = "Upload a document to Paperless-ngx")]
 struct Args {
@@ -72,7 +85,7 @@ struct Config {
 const APP_NAME: &str = "paperless-ngx-tools";
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), PaperlessToolError> {
     env_logger::init();
 
     info!(
@@ -100,7 +113,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::ListCorrespondents { name }) => {
             let corrs = client.correspondents(name.clone()).await?;
             for c in corrs {
-                println!("{}: {}", c.id, c.name)
+                println!("{}: {} [{}]", c.id, c.name, c.document_count)
             }
         }
         Some(Commands::ListDocuments { correspondent }) => {
@@ -146,10 +159,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             println!("Deleting {}", correspondent);
             if correspondent.document_count > 0 && !force {
-                format!(
-                    "Error: --force not set, and {} documents refer to this ID",
-                    correspondent.document_count
-                );
+                return Err(PaperlessToolError::UnableToDelete {
+                    id: *id,
+                    reason: format!(
+                        "Error: --force not set, and {} documents refer to this ID",
+                        correspondent.document_count
+                    ),
+                });
             } else {
                 client.correspondent_delete(id).await?;
                 println!("Deleted {}", correspondent);

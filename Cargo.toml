@@ -20,3 +20,4 @@ paperless_ngx_api = { version = "0.2.0", path = "../lib-paperless-ngx-rs" }
 serde = { version = "1.0.152", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7.3", features = ["codec"] }
+thiserror = "2.0.11"
