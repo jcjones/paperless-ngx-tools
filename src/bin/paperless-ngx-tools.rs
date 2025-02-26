@@ -49,6 +49,15 @@ enum Commands {
         #[arg(short, long)]
         to: i32,
     },
+    /// delete a correspondent
+    DeleteCorrespondent {
+        /// Delete even if there are referring documents
+        #[arg(short, long)]
+        force: bool,
+
+        /// Correspondent ID
+        id: i32,
+    },
 
     /// Stores the --auth and --url to the config file
     Store,
@@ -124,12 +133,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             for from_id in from {
                 let from_correspondent = client.correspondent_get(from_id).await?;
 
-                info!("Moving from {} to {}", from_correspondent, to_correspondent);
+                println!("Moving from {} to {}", from_correspondent, to_correspondent);
                 let doc_ids = client.document_ids(Some(from_correspondent)).await?;
 
                 client
                     .documents_bulk_set_correspondent(doc_ids, &to_correspondent)
                     .await?;
+            }
+        }
+        Some(Commands::DeleteCorrespondent { id, force }) => {
+            let correspondent = client.correspondent_get(id).await?;
+
+            println!("Deleting {}", correspondent);
+            if correspondent.document_count > 0 && !force {
+                format!(
+                    "Error: --force not set, and {} documents refer to this ID",
+                    correspondent.document_count
+                );
+            } else {
+                client.correspondent_delete(id).await?;
+                println!("Deleted {}", correspondent);
             }
         }
         Some(Commands::Store) => {
