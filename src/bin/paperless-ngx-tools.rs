@@ -43,7 +43,7 @@ enum Commands {
     MigrateCorrespondents {
         /// Correspondent ID to move documents from
         #[arg(short, long)]
-        from: i32,
+        from: Vec<i32>,
 
         /// Correspondent ID to move documents to
         #[arg(short, long)]
@@ -119,13 +119,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
         Some(Commands::MigrateCorrespondents { from, to }) => {
-            let from_correspondent = client.correspondent_get(from).await?;
             let to_correspondent = client.correspondent_get(to).await?;
-            println!("Moving from {} to {}", from_correspondent, to_correspondent);
-            let doc_ids = client.document_ids(Some(from_correspondent)).await?;
-            client
-                .documents_bulk_set_correspondent(doc_ids, &to_correspondent)
-                .await?
+
+            for from_id in from {
+                let from_correspondent = client.correspondent_get(from_id).await?;
+
+                info!("Moving from {} to {}", from_correspondent, to_correspondent);
+                let doc_ids = client.document_ids(Some(from_correspondent)).await?;
+
+                client
+                    .documents_bulk_set_correspondent(doc_ids, &to_correspondent)
+                    .await?;
+            }
         }
         Some(Commands::Store) => {
             confy::store(APP_NAME, None, &cfg)?;
