@@ -67,8 +67,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let client = PaperlessNgxClientBuilder::default()
-        .set_url(cfg.url)
-        .set_auth_token(cfg.auth)
+        .set_url(&cfg.url)
+        .set_auth_token(&cfg.auth)
         .build()?;
 
     for filepath in args.files {

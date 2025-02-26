@@ -20,7 +20,7 @@ struct Args {
 enum Commands {
     /// list correspondants
     ListCorrespondents {
-        /// filter by name
+        /// Filter by Correspondant Name
         #[arg(short, long)]
         name: Option<String>,
     },
@@ -29,6 +29,15 @@ enum Commands {
         /// filter by correspondent name
         #[arg(short, long)]
         correspondent: Option<String>,
+    },
+    MigrateCorrespondents {
+        /// Correspondent ID to move documents from
+        #[arg(short, long)]
+        from_correspondent_id: i32,
+
+        /// Correspondent ID to move documents to
+        #[arg(short, long)]
+        to_correspondent_id: i32,
     },
 
     /// Stores the --auth and --url to the config file
@@ -63,12 +72,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let client = PaperlessNgxClientBuilder::default()
-        .set_url(cfg.url.clone())
-        .set_auth_token(cfg.auth.clone())
+        .set_url(&cfg.url)
+        .set_auth_token(&cfg.auth)
         .build()?;
 
-    // You can check for the existence of subcommands, and if found use their
-    // matches just as you would the top level cmd
     match &args.command {
         Some(Commands::ListCorrespondents { name }) => {
             let corrs = client.correspondents(name.clone()).await?;
@@ -85,8 +92,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             let docs = client.documents(correspondent_obj).await?;
             for doc in docs {
-                println!("{}: {} [{:?}]", doc.id, doc.title, doc.tags)
+                println!("{}: {} [{:?}]", doc.id, doc.title, doc.tags);
             }
+        }
+        Some(Commands::MigrateCorrespondents {
+            from_correspondent_id,
+            to_correspondent_id,
+        }) => {
+            println!(
+                "Moving from {} to {}",
+                from_correspondent_id, to_correspondent_id,
+            );
         }
         Some(Commands::Store) => {
             confy::store(APP_NAME, None, &cfg)?;
