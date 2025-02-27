@@ -1,6 +1,6 @@
 [package]
 name = "paperless-ngx-tools"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 license = "MPL-2.0"
@@ -16,7 +16,7 @@ confy = "0.6.1"
 env_logger = "0.9"
 indicatif = { version = "0.17.11", features = ["tokio"] }
 log = "0.4"
-paperless_ngx_api = { version = "0.2.0", path = "../lib-paperless-ngx-rs" }
+paperless_ngx_api = { version = "0.2.0" }
 serde = { version = "1.0.152", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7.3", features = ["codec"] }

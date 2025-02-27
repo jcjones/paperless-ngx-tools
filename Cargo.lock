@@ -967,7 +967,7 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
 name = "paperless-ngx-tools"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "confy",
@@ -984,6 +984,8 @@ dependencies = [
 [[package]]
 name = "paperless_ngx_api"
 version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd8d7e18b34d1a7bfe69de9fcf8fb49e14e8e2c63d1d9b00e83872f5585f400f"
 dependencies = [
  "log",
  "reqwest",
