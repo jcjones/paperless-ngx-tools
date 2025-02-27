@@ -23,6 +23,8 @@ struct Config {
     auth: String,
 }
 
+const APP_NAME: &str = "paperless-ngx-tools";
+
 async fn print_task_status<'a>(task: Task<'a>) -> Result<(), Box<dyn std::error::Error>> {
     let bar = ProgressBar::new_spinner();
     bar.enable_steady_tick(Duration::from_millis(100));
@@ -56,10 +58,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!(
         "Loading configuration from {:?}",
-        confy::get_configuration_file_path("paperless-ngx-upload", None)?
+        confy::get_configuration_file_path(APP_NAME, None)?
     );
 
-    let mut cfg: Config = confy::load("paperless-ngx-upload", None).unwrap();
+    let mut cfg: Config = confy::load(APP_NAME, None).unwrap();
     let args = Args::parse();
 
     if let Some(u) = args.url {

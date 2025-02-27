@@ -17,7 +17,7 @@ pub enum PaperlessToolError {
 }
 
 #[derive(Parser, Debug)]
-#[command(version, about = "Upload a document to Paperless-ngx")]
+#[command(version, about = "Interact with Paperless-ngx")]
 struct Args {
     #[command(subcommand)]
     command: Option<Commands>,
