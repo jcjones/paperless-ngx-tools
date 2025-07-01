@@ -11,13 +11,13 @@ readme = "README.md"
 default-run = "paperless-ngx-tools"
 
 [dependencies]
-clap = { version = "4.5.30", features = ["derive"] }
-confy = "0.6.1"
-env_logger = "0.9"
-indicatif = { version = "0.17.11", features = ["tokio"] }
+clap = { version = "4.5.40", features = ["derive"] }
+confy = "1.0.0"
+env_logger = "0.11.8"
+indicatif = { version = "0.17.12", features = ["tokio"] }
 log = "0.4"
 paperless_ngx_api = { version = "0.3.0", features = ["rustls-tls"] }
-serde = { version = "1.0.152", features = ["derive"] }
+serde = { version = "1.0.219", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
-tokio-util = { version = "0.7.3", features = ["codec"] }
-thiserror = "2.0.11"
+tokio-util = { version = "0.7.15", features = ["codec"] }
+thiserror = "2.0.12"
